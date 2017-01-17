@@ -5,9 +5,9 @@ import (
 )
 
 type User struct {
-	ID        int64
-	Score     int64
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID      int64 `xorm:"pk autoincr"`
+	Score   int64
+	Created time.Time `xorm:"created"`
+	Updated time.Time `xorm:"updated"`
 	// TODO OAuth sutff
 }

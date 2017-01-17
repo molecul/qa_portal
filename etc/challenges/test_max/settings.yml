@@ -1,0 +1,4 @@
+name: 
+image: images/pytest
+# if cmd not specifed, used image cmd
+cmd: "./check.sh"

@@ -5,7 +5,7 @@ import (
 	"github.com/mogaika/qa_portal/model"
 )
 
-type Settings struct {
+type Configuration struct {
 	Endpoint string // docker socket path
 	Timeout  int    // docker run timeout in milliseconds
 	Threads  int    // docker runs in one time
@@ -13,30 +13,24 @@ type Settings struct {
 
 type Checker struct {
 	Docker *docker.Client
-	Cfg    *Settings
+	Config *Configuration
 }
 
-var checker *Checker = nil
+var checker *Checker
 
-func GetChecker() *Checker {
+func Get() *Checker {
 	return checker
 }
 
-func NewChecker(cfg *Settings) (c *Checker, err error) {
-	if checker != nil {
-		panic("Checker already created")
-	}
-
+func Init(cfg *Configuration) (err error) {
 	if cfg.Endpoint == "" {
 		cfg.Endpoint = "unix:///var/run/docker.sock"
 	}
 
-	c = &Checker{Cfg: cfg}
-
+	c := &Checker{Config: cfg}
 	if c.Docker, err = docker.NewClient(cfg.Endpoint); err != nil {
 		return
 	}
-
 	checker = c
 	return
 }

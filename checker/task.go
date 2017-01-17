@@ -5,9 +5,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"log"
 	"strconv"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/fsouza/go-dockerclient"
 	"github.com/molecul/qa_portal/model"
 )
@@ -77,30 +77,34 @@ func (task *Task) dockerLoadLogs() error {
 }
 
 func (task *Task) runTask(ctx context.Context) (err error) {
-	if task.Container, err = task.Docker.CreateContainer(docker.CreateContainerOptions{
+	createOptions := docker.CreateContainerOptions{
 		Name: fmt.Sprintf("qachecker-%v", task.Test.ID),
 		Config: &docker.Config{
 			Tty:             true,
+			NetworkDisabled: true,
 			Image:           task.Challenge.Image,
 			Entrypoint:      []string{"/bin/bash", "-c"},
-			Cmd:             []string{task.Challenge.ImageTestCmd},
-			NetworkDisabled: true,
 			Env: []string{
 				"CHECKER_CHALLENGE=" + task.Challenge.InternalName,
 				"CHECKER_TEST=" + strconv.FormatInt(task.Test.ID, 10),
-				"CHECKER_FILE=" + task.Challenge.ImageTestFile,
+				"CHECKER_FILE=" + task.Challenge.TargetPath,
 			},
 		},
 		HostConfig: &docker.HostConfig{
 		// TODO We really need this?
 		// AutoRemove: true,
 		},
-	}); err != nil {
+	}
+	if task.Challenge.Cmd != "" {
+		createOptions.Config.Cmd = []string{task.Challenge.Cmd}
+	}
+
+	if task.Container, err = task.Docker.CreateContainer(createOptions); err != nil {
 		return fmt.Errorf("Error creating container: %v", err)
 	}
 
 	defer func() {
-		log.Printf("autoremove %s", task.Container.ID)
+		logrus.Infof("autoremove %s", task.Container.ID)
 		task.Docker.RemoveContainer(docker.RemoveContainerOptions{
 			ID:    task.Container.ID,
 			Force: true,
@@ -108,7 +112,7 @@ func (task *Task) runTask(ctx context.Context) (err error) {
 	}()
 
 	// TODO Change input file to real file data
-	if err = task.dockerInjectFile(task.Challenge.ImageTestFile, []byte(task.Test.InputFile)); err != nil {
+	if err = task.dockerInjectFile(task.Challenge.TargetPath, []byte(task.Test.InputFile)); err != nil {
 		return err
 	}
 
