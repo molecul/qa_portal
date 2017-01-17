@@ -10,6 +10,7 @@ import (
 	"github.com/molecul/qa_portal/checker"
 	"github.com/molecul/qa_portal/model"
 	"github.com/molecul/qa_portal/util/database"
+	"github.com/molecul/qa_portal/web"
 )
 
 const TimestampFormat = "06-01-02 15:04:05.000"
@@ -30,11 +31,6 @@ func init() {
 
 func main() {
 	logrus.Infof("Starting server")
-	if err := checker.Init(&checker.Configuration{
-		Endpoint: "tcp://127.0.0.1:6666",
-	}); err != nil {
-		logrus.Fatalf("Error when creating checker: %v", err)
-	}
 
 	if err := database.Init(&database.Configuration{
 		Driver: "sqlite3",
@@ -49,7 +45,19 @@ func main() {
 		logrus.Fatalf("Error syncing db: %v", err)
 	}
 
-	test_checker(checker.Get())
+	if err := checker.Init(&checker.Configuration{
+		Endpoint: "tcp://127.0.0.1:6666",
+	}); err != nil {
+		logrus.Fatalf("Error when creating checker: %v", err)
+	}
+
+	web.Run(&web.Configuration{
+		Hostname: "0.0.0.0",
+		UseHTTP:  true,
+		HTTPPort: 8000,
+	})
+
+	//test_checker(checker.Get())
 }
 
 func test_checker(c *checker.Checker) {
