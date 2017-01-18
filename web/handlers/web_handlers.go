@@ -9,3 +9,9 @@ import (
 func UserInfoHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"Hello": "from private", "user": ctx.MustGet("user").(google.User)})
 }
+
+func MainPageHandler(c *gin.Context) {
+	c.HTML(http.StatusOK, "index.html", gin.H{
+		"title": "Main website",
+	})
+}

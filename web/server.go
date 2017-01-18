@@ -52,6 +52,11 @@ func (c *Configuration) runServer(handlers http.Handler, isTls bool) (err error)
 }
 
 func (cfg *Configuration) initRoutes(r *gin.Engine) {
+
+	r.StaticFS("/static", http.Dir("./web/static"))
+
+	r.LoadHTMLGlob("./web/templates/*")
+
 	scopes := []string{
 		"https://www.googleapis.com/auth/userinfo.email",
 		// You have to select your own scope from here -> https://developers.google.com/identity/protocols/googlescopes#google_sign-in
@@ -66,10 +71,14 @@ func (cfg *Configuration) initRoutes(r *gin.Engine) {
 	// protected url group
 	private := r.Group("/auth")
 	private.Use(google.Auth())
-	private.GET("/", webHandlers.UserInfoHandler)
-	private.GET("/api", func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{"message": "Hello from private for groups"})
-	})
+	{
+		private.GET("/", webHandlers.UserInfoHandler)
+		private.GET("/api", func(ctx *gin.Context) {
+			ctx.JSON(200, gin.H{"message": "Hello from private for groups"})
+		})
+	}
+
+	r.GET("/", webHandlers.MainPageHandler)
 
 }
 
