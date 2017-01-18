@@ -6,7 +6,10 @@ import (
 	"sync"
 
 	"github.com/Sirupsen/logrus"
-	"gopkg.in/gin-gonic/gin.v1"
+
+	"github.com/gin-gonic/gin"
+	"github.com/zalando/gin-oauth2/google"
+	"github.com/molecul/qa_portal/web/handlers"
 )
 
 type Configuration struct {
@@ -17,6 +20,7 @@ type Configuration struct {
 	HTTPSPort int
 	CertFile  string
 	KeyFile   string
+	CredFile  string
 }
 
 func (c *Configuration) getServerPort(isTls bool) int {
@@ -48,11 +52,29 @@ func (c *Configuration) runServer(handlers http.Handler, isTls bool) (err error)
 }
 
 func (cfg *Configuration) initRoutes(r *gin.Engine) {
+	scopes := []string{
+		"https://www.googleapis.com/auth/userinfo.email",
+		// You have to select your own scope from here -> https://developers.google.com/identity/protocols/googlescopes#google_sign-in
+	}
+	secret := []byte("secret")
+	sessionName := "goquestsession"
+	credFile := "./clientid.google.json"
+	google.Setup("/auth/", credFile, scopes, secret)
+	r.Use(google.Session(sessionName))
+	r.GET("/login", google.LoginHandler)
+
+	// protected url group
+	private := r.Group("/auth")
+	private.Use(google.Auth())
+	private.GET("/", webHandlers.UserInfoHandler)
+	private.GET("/api", func(ctx *gin.Context) {
+		ctx.JSON(200, gin.H{"message": "Hello from private for groups"})
+	})
 
 }
 
 func Run(cfg *Configuration) {
-	r := gin.New()
+	r := gin.Default()
 
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
