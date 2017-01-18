@@ -2,7 +2,7 @@ package checker
 
 import (
 	"github.com/fsouza/go-dockerclient"
-	"github.com/mogaika/qa_portal/model"
+	"github.com/molecul/qa_portal/model"
 )
 
 type Configuration struct {
