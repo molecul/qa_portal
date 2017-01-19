@@ -12,3 +12,7 @@ This is a portal for training and testing skills QA engineers.
   - templates/ - Templates for web pages
 - model/ - Database abstraction
 - util/ - Miscellaneous
+
+## Continuous Integration
+
+[![Build Status](https://travis-ci.org/molecul/qa_portal.svg?branch=master)](https://travis-ci.org/molecul/qa_portal)
