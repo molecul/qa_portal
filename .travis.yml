@@ -1,0 +1,14 @@
+language: go
+
+go:
+  - master
+
+install:
+  - go get github.com/Sirupsen/logrus
+  - go get github.com/molecul/qa_portal
+  - go get github.com/fsouza/go-dockerclient
+  - go get github.com/go-sql-driver/mysql
+  - go get github.com/go-xorm/xorm
+  - go get github.com/mattn/go-sqlite3
+  - go get github.com/gin-gonic/gin
+  - go get github.com/zalando/gin-oauth2/google
