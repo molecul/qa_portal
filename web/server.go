@@ -6,21 +6,32 @@ import (
 	"sync"
 
 	"github.com/Sirupsen/logrus"
-
 	"github.com/gin-gonic/gin"
-	"github.com/zalando/gin-oauth2/google"
 	"github.com/molecul/qa_portal/web/handlers"
+	"github.com/zalando/gin-oauth2/google"
 )
 
+var googleScopes = []string{
+	"https://www.googleapis.com/auth/userinfo.email",
+	// You have to select your own scope from here -> https://developers.google.com/identity/protocols/googlescopes#google_sign-in
+}
+
+type GoogleOAuthConfig struct {
+	Secret      string
+	SessionName string
+	CredFile    string
+}
+
 type Configuration struct {
-	Hostname  string
-	UseHTTP   bool
-	UseHTTPS  bool
-	HTTPPort  int
-	HTTPSPort int
-	CertFile  string
-	KeyFile   string
-	CredFile  string
+	Hostname    string
+	UseHTTP     bool
+	UseHTTPS    bool
+	HTTPPort    int
+	HTTPSPort   int
+	CertFile    string
+	KeyFile     string
+	CredFile    string
+	GoogleOAuth GoogleOAuthConfig
 }
 
 func (c *Configuration) getServerPort(isTls bool) int {
@@ -51,21 +62,18 @@ func (c *Configuration) runServer(handlers http.Handler, isTls bool) (err error)
 	return
 }
 
-func (cfg *Configuration) initRoutes(r *gin.Engine) {
+func (g *GoogleOAuthConfig) setup() {
+	google.Setup("/auth/", g.CredFile, googleScopes, []byte(g.Secret))
+}
 
+func (cfg *Configuration) initRoutes(r *gin.Engine) {
 	r.StaticFS("/static", http.Dir("./web/static"))
 
 	r.LoadHTMLGlob("./web/templates/*")
 
-	scopes := []string{
-		"https://www.googleapis.com/auth/userinfo.email",
-		// You have to select your own scope from here -> https://developers.google.com/identity/protocols/googlescopes#google_sign-in
-	}
-	secret := []byte("secret")
-	sessionName := "goquestsession"
-	credFile := "./clientid.google.json"
-	google.Setup("/auth/", credFile, scopes, secret)
-	r.Use(google.Session(sessionName))
+	cfg.GoogleOAuth.setup()
+
+	r.Use(google.Session(cfg.GoogleOAuth.SessionName))
 	r.GET("/login", google.LoginHandler)
 
 	// protected url group
@@ -84,9 +92,6 @@ func (cfg *Configuration) initRoutes(r *gin.Engine) {
 
 func Run(cfg *Configuration) {
 	r := gin.Default()
-
-	r.Use(gin.Logger())
-	r.Use(gin.Recovery())
 
 	cfg.initRoutes(r)
 
