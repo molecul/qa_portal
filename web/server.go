@@ -24,6 +24,7 @@ type GoogleOAuthConfig struct {
 
 type Configuration struct {
 	Hostname    string
+	Listen      string
 	UseHTTP     bool
 	UseHTTPS    bool
 	HTTPPort    int
@@ -43,7 +44,15 @@ func (c *Configuration) getServerPort(isTls bool) int {
 }
 
 func (c *Configuration) getServerAddr(isTls bool) string {
-	return fmt.Sprintf("%s:%d", c.Hostname, c.getServerPort(isTls))
+	return fmt.Sprintf("%s:%d", c.Listen, c.getServerPort(isTls))
+}
+
+func (c *Configuration) getHostname() string {
+	if c.UseHTTPS {
+		return fmt.Sprintf("https://%s:%d", c.Hostname, c.HTTPSPort)
+	} else {
+		return fmt.Sprintf("http://%s:%d", c.Hostname, c.HTTPPort)
+	}
 }
 
 func (c *Configuration) runServer(handlers http.Handler, isTls bool) (err error) {
@@ -62,16 +71,15 @@ func (c *Configuration) runServer(handlers http.Handler, isTls bool) (err error)
 	return
 }
 
-func (g *GoogleOAuthConfig) setup() {
-	google.Setup("/auth/", g.CredFile, googleScopes, []byte(g.Secret))
+func (cfg *Configuration) setupGoogle() {
+	gc := &cfg.GoogleOAuth
+	google.Setup(cfg.getHostname()+"/auth/", gc.CredFile, googleScopes, []byte(gc.Secret))
 }
 
 func (cfg *Configuration) initRoutes(r *gin.Engine) {
 	r.StaticFS("/static", http.Dir("./web/static"))
 
 	r.LoadHTMLGlob("./web/templates/*")
-
-	cfg.GoogleOAuth.setup()
 
 	r.Use(google.Session(cfg.GoogleOAuth.SessionName))
 	r.GET("/login", google.LoginHandler)
@@ -93,6 +101,7 @@ func (cfg *Configuration) initRoutes(r *gin.Engine) {
 func Run(cfg *Configuration) {
 	r := gin.Default()
 
+	cfg.setupGoogle()
 	cfg.initRoutes(r)
 
 	logrus.Info("Starting web server")
