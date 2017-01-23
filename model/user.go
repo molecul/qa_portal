@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/molecul/qa_portal/util/database"
-	"github.com/zalando/gin-oauth2/google"
+	"github.com/molecul/qa_portal/web/middleware/oauth2"
 )
 
 type User struct {

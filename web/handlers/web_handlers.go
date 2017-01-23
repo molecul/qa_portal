@@ -11,7 +11,7 @@ import (
 	"github.com/molecul/qa_portal/checker"
 	"github.com/molecul/qa_portal/model"
 	"github.com/molecul/qa_portal/web/middleware"
-	"github.com/zalando/gin-oauth2/google"
+	"github.com/molecul/qa_portal/web/middleware/oauth2"
 )
 
 func doError(ctx *gin.Context, err error) {

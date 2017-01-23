@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/molecul/qa_portal/web/handlers"
 	"github.com/molecul/qa_portal/web/middleware"
-	"github.com/zalando/gin-oauth2/google"
+	"github.com/molecul/qa_portal/web/middleware/oauth2"
 )
 
 var googleScopes = []string{
