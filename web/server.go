@@ -96,6 +96,7 @@ func (cfg *Configuration) initRoutes(r *gin.Engine) {
 	}
 
 	r.GET("/", webHandlers.MainPageHandler)
+	r.GET("/api/healthcheck", webHandlers.DockerHealthCheckHandler)
 
 }
 

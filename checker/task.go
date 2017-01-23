@@ -136,28 +136,3 @@ func (task *Task) Do(ctx context.Context) (err error) {
 
 	return err
 }
-
-func test_checker(c *Checker) {
-	task := c.NewTask(&model.Challenge{
-		ID:         543,
-		Image:      "python:2.7",
-		TargetPath: "/tmp/task.py",
-		Cmd:        "echo \"Inside $CHECKER_FILE:\"; cat $CHECKER_FILE",
-		//Cmd: "for i in `seq 5`; do sleep 1; echo \"$i\"; done",
-		InternalName: "test",
-	}, &model.Test{
-		ID:          rand.Int63(),
-		ChallengeID: rand.Int63(),
-		InputFile:   "1542 ololo 5f34 mda mda mda",
-	})
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	if err := task.Do(ctx); err != nil {
-		logrus.Print(err)
-	}
-	cancel()
-
-	logrus.Printf("ExitCode: %v", task.Result.ExitCode)
-	logrus.Printf("Stdout:\n%v", task.Result.Stdout.String())
-	logrus.Printf("Stderr:\n%v", task.Result.Stderr.String())
-}

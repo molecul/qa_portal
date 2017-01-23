@@ -1,11 +1,16 @@
 package webHandlers
 
 import (
+	"context"
+	"math/rand"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/molecul/qa_portal/checker"
 	"github.com/molecul/qa_portal/model"
 	"github.com/zalando/gin-oauth2/google"
+	"github.com/Sirupsen/logrus"
 )
 
 func doError(ctx *gin.Context, err error) {
@@ -45,4 +50,27 @@ func MainPageHandler(c *gin.Context) {
 	c.HTML(http.StatusOK, "index.html", gin.H{
 		"title": "Main website",
 	})
+}
+
+func DockerHealthCheckHandler(c *gin.Context) {
+	task := checker.Get().NewTask(&model.Challenge{
+		ID:         rand.Int63(),
+		Image:      "python:2.7",
+		TargetPath: "/tmp/task.py",
+		Cmd:        "echo \"Inside $CHECKER_FILE:\"; cat $CHECKER_FILE",
+		InternalName: "test",
+	}, &model.Test{
+		ID:          rand.Int63(),
+		ChallengeID: rand.Int63(),
+		InputFile:   "healthcheck",
+	})
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	if err := task.Do(ctx); err != nil {
+		c.JSON(http.StatusBadGateway, err)
+		logrus.Print(err)
+	} else {
+		c.JSON(http.StatusOK, task.Result)
+	}
+	cancel()
 }
