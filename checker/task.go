@@ -5,9 +5,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"math/rand"
 	"strconv"
-	"time"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/fsouza/go-dockerclient"
