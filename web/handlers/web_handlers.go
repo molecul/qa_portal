@@ -6,11 +6,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/molecul/qa_portal/checker"
 	"github.com/molecul/qa_portal/model"
+	"github.com/molecul/qa_portal/web/middleware"
 	"github.com/zalando/gin-oauth2/google"
-	"github.com/Sirupsen/logrus"
 )
 
 func doError(ctx *gin.Context, err error) {
@@ -18,7 +19,7 @@ func doError(ctx *gin.Context, err error) {
 	panic(err)
 }
 
-func UserInfoHandler(ctx *gin.Context) {
+func UserLoginHandler(ctx *gin.Context) {
 	gu := ctx.MustGet("user").(google.User)
 	usr, err := model.GetUserByEmail(gu.Email)
 	if err != nil {
@@ -36,6 +37,9 @@ func UserInfoHandler(ctx *gin.Context) {
 			doError(ctx, err)
 			return
 		}
+		if usr == nil {
+			doError(ctx, nil)
+		}
 		// ================================
 	} else {
 		if err = usr.FillFromGoogle(&gu).Update(); err != nil {
@@ -43,6 +47,7 @@ func UserInfoHandler(ctx *gin.Context) {
 			return
 		}
 	}
+	middleware.UserSessionSet(ctx, usr.ID)
 	ctx.JSON(http.StatusOK, gin.H{"Hello": "from private", "user": gu, "internal_user": usr})
 }
 
@@ -54,10 +59,10 @@ func MainPageHandler(c *gin.Context) {
 
 func DockerHealthCheckHandler(c *gin.Context) {
 	task := checker.Get().NewTask(&model.Challenge{
-		ID:         rand.Int63(),
-		Image:      "python:2.7",
-		TargetPath: "/tmp/task.py",
-		Cmd:        "echo \"Inside $CHECKER_FILE:\"; cat $CHECKER_FILE",
+		ID:           rand.Int63(),
+		Image:        "python:2.7",
+		TargetPath:   "/tmp/task.py",
+		Cmd:          "echo \"Inside $CHECKER_FILE:\"; cat $CHECKER_FILE",
 		InternalName: "test",
 	}, &model.Test{
 		ID:          rand.Int63(),

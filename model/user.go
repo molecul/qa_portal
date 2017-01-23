@@ -46,15 +46,8 @@ func GetUserByEmail(email string) (*User, error) {
 
 func CreateUser(u *User) error {
 	u.Email = strings.ToLower(u.Email)
-	usr, err := GetUserByEmail(u.Email)
-	if err != nil {
-		return err
-	}
-	if usr != nil {
-		return ErrUserAlreadyExist{u: usr}
-	}
 
-	_, err = database.Get().InsertOne(u)
+	_, err := database.Get().InsertOne(u)
 	return err
 }
 

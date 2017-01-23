@@ -8,6 +8,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/molecul/qa_portal/web/handlers"
+	"github.com/molecul/qa_portal/web/middleware"
 	"github.com/zalando/gin-oauth2/google"
 )
 
@@ -78,26 +79,25 @@ func (cfg *Configuration) setupGoogle() {
 }
 
 func (cfg *Configuration) initRoutes(r *gin.Engine) {
-	r.StaticFS("/static", http.Dir("./web/static"))
-
 	r.LoadHTMLGlob("./web/templates/*")
 
-	r.Use(google.Session(cfg.GoogleOAuth.SessionName))
-	r.GET("/login", google.LoginHandler)
+	r.StaticFS("/static", http.Dir("./web/static"))
 
-	// protected url group
-	private := r.Group("/auth")
-	private.Use(google.Auth())
-	{
-		private.GET("/", webHandlers.UserInfoHandler)
-		private.GET("/api", func(ctx *gin.Context) {
-			ctx.JSON(200, gin.H{"message": "Hello from private for groups"})
-		})
-	}
+	r.Use(google.Session(cfg.GoogleOAuth.SessionName))
+	r.Use(middleware.User())
 
 	r.GET("/", webHandlers.MainPageHandler)
-	r.GET("/api/healthcheck", webHandlers.DockerHealthCheckHandler)
+	r.GET("/login", google.LoginHandler)
 
+	api := r.Group("/api")
+	api.GET("/healthcheck", webHandlers.DockerHealthCheckHandler)
+	api.GET("/userinfo", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{"user": middleware.UserFromContext(ctx)})
+	})
+
+	auth := r.Group("/auth")
+	auth.Use(google.Auth())
+	auth.GET("/", webHandlers.UserLoginHandler)
 }
 
 func Run(cfg *Configuration) {
