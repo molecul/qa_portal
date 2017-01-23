@@ -90,10 +90,10 @@ func (cfg *Configuration) initRoutes(r *gin.Engine) {
 	r.GET("/login", google.LoginHandler)
 
 	api := r.Group("/api")
-	api.GET("/healthcheck", webHandlers.DockerHealthCheckHandler)
-	api.GET("/userinfo", func(ctx *gin.Context) {
+	api.GET("/healthcheck", middleware.UserMust(webHandlers.DockerHealthCheckHandler))
+	api.GET("/userinfo", middleware.UserMust(func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{"user": middleware.UserFromContext(ctx)})
-	})
+	}))
 
 	auth := r.Group("/auth")
 	auth.Use(google.Auth())
