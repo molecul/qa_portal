@@ -13,7 +13,7 @@ type User struct {
 	Score         int64
 	Created       time.Time `xorm:"created"`
 	Updated       time.Time `xorm:"updated"`
-	Email         string
+	Email         string    `xorm:"unique"`
 	EmailVerified bool
 	Picture       string
 	Name          string
@@ -46,7 +46,15 @@ func GetUserByEmail(email string) (*User, error) {
 
 func CreateUser(u *User) error {
 	u.Email = strings.ToLower(u.Email)
-	_, err := database.Get().InsertOne(u)
+	usr, err := GetUserByEmail(u.Email)
+	if err != nil {
+		return err
+	}
+	if usr != nil {
+		return ErrUserAlreadyExist{u: usr}
+	}
+
+	_, err = database.Get().InsertOne(u)
 	return err
 }
 

@@ -39,7 +39,6 @@ func UserInfoHandler(ctx *gin.Context) {
 		}
 	}
 	ctx.JSON(http.StatusOK, gin.H{"Hello": "from private", "user": gu, "internal_user": usr})
-
 }
 
 func MainPageHandler(c *gin.Context) {
