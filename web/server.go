@@ -87,14 +87,24 @@ func (cfg *Configuration) initRoutes(r *gin.Engine) {
 	r.Use(middleware.User())
 
 	r.GET("/", webHandlers.MainPageHandler)
+
+	// Auth section
 	r.GET("/login", google.LoginHandler)
+
+	auth := r.Group("/auth")
+	auth.Use(google.Auth())
+	auth.GET("/", webHandlers.UserLoginHandler())
+
+	// Deauth section
 	r.GET("/logout", webHandlers.UserLogoutHandler(cfg.GoogleOAuth.SessionName))
 
+	// Api section
 	api := r.Group("/api")
 	api.GET("/healthcheck", middleware.UserMust(webHandlers.DockerHealthCheckHandler))
 	api.GET("/userinfo", middleware.UserMust(func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{"user": middleware.UserFromContext(ctx)})
 	}))
+
 }
 
 func Run(cfg *Configuration) {
