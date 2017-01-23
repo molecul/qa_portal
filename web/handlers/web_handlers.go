@@ -2,8 +2,8 @@ package webHandlers
 
 import (
 	"context"
-	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/Sirupsen/logrus"
@@ -58,16 +58,17 @@ func MainPageHandler(c *gin.Context) {
 }
 
 func DockerHealthCheckHandler(c *gin.Context) {
+	temp_id, _ := strconv.Atoi(time.Now().Format("20060102150405"))
 	task := checker.Get().NewTask(&model.Challenge{
-		ID:           rand.Int63(),
-		Image:        "python:2.7",
-		TargetPath:   "/tmp/task.py",
-		Cmd:          "echo \"Inside $CHECKER_FILE:\"; cat $CHECKER_FILE",
+		ID: 	    int64(temp_id),
+		Image:      "python:2.7",
+		TargetPath: "/tmp/task.py",
+		Cmd:        "echo \"Inside $CHECKER_FILE:\"; cat $CHECKER_FILE",
 		InternalName: "test",
 	}, &model.Test{
-		ID:          rand.Int63(),
-		ChallengeID: rand.Int63(),
-		InputFile:   "healthcheck",
+		ID:          int64(temp_id),
+		ChallengeID: int64(temp_id),
+		InputFile:   "healthcheck_"+strconv.FormatInt(int64(temp_id), 10),
 	})
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
@@ -75,7 +76,12 @@ func DockerHealthCheckHandler(c *gin.Context) {
 		c.JSON(http.StatusBadGateway, err)
 		logrus.Print(err)
 	} else {
-		c.JSON(http.StatusOK, task.Result)
+
+		c.JSON(http.StatusOK,
+			gin.H{
+				"exitcode": task.Result.ExitCode,
+				"stdout": task.Result.Stdout.String(),
+				"stderr": task.Result.Stderr.String()})
 	}
 	cancel()
 }
