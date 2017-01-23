@@ -51,6 +51,13 @@ func UserLoginHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"Hello": "from private", "user": gu, "internal_user": usr})
 }
 
+func UserLogoutHandler (Hostname, SessionName string) gin.HandlerFunc {
+	fn := func(ctx *gin.Context) {
+		ctx.SetCookie(SessionName, "null", 1000, "/", Hostname, false, false)
+	}
+	return gin.HandlerFunc(fn)
+}
+
 func MainPageHandler(c *gin.Context) {
 	c.HTML(http.StatusOK, "index.html", gin.H{
 		"title": "Main website",
