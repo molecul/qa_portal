@@ -24,9 +24,15 @@ func User() gin.HandlerFunc {
 }
 
 func UserFromContext(c *gin.Context) *model.User {
-	return c.MustGet(userKey).(*model.User)
+	if u, ex := c.Get(userKey); ex {
+		return u.(*model.User)
+	} else {
+		return nil
+	}
 }
 
 func UserSessionSet(c *gin.Context, userid int64) {
-	sessions.Default(c).Set(userIdKey, userid)
+	session := sessions.Default(c)
+	session.Set(userIdKey, userid)
+	session.Save()
 }
