@@ -88,7 +88,7 @@ func (cfg *Configuration) initRoutes(r *gin.Engine) {
 
 	r.GET("/", webHandlers.MainPageHandler)
 	r.GET("/login", google.LoginHandler)
-	r.GET("/logout", google.LogoutHandler(cfg.Hostname, cfg.GoogleOAuth.SessionName))
+	r.GET("/logout", webHandlers.UserLogoutHandler(cfg.GoogleOAuth.SessionName))
 
 	api := r.Group("/api")
 	api.GET("/healthcheck", middleware.UserMust(webHandlers.DockerHealthCheckHandler))
