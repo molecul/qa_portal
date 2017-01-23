@@ -95,10 +95,6 @@ func (cfg *Configuration) initRoutes(r *gin.Engine) {
 	api.GET("/userinfo", middleware.UserMust(func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{"user": middleware.UserFromContext(ctx)})
 	}))
-
-	auth := r.Group("/auth")
-	auth.Use(google.Auth())
-	auth.GET("/", webHandlers.UserLoginHandler())
 }
 
 func Run(cfg *Configuration) {
