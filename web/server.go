@@ -19,9 +19,10 @@ var googleScopes = []string{
 }
 
 type GoogleOAuthConfig struct {
-	Secret      string
-	SessionName string
-	CredFile    string
+	Secret        string
+	SessionName   string
+	OAuthClientId string
+	OAuthSecret   string
 }
 
 type Configuration struct {
@@ -75,7 +76,7 @@ func (c *Configuration) runServer(handlers http.Handler, isTls bool) (err error)
 
 func (cfg *Configuration) setupGoogle() {
 	gc := &cfg.GoogleOAuth
-	google.Setup(cfg.getHostname()+"/auth/", gc.CredFile, googleScopes, []byte(gc.Secret))
+	google.Setup(cfg.getHostname()+"/auth/", gc.OAuthClientId, gc.OAuthSecret, googleScopes, []byte(gc.Secret))
 }
 
 func (cfg *Configuration) initRoutes(r *gin.Engine) {

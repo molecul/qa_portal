@@ -11,7 +11,8 @@ web:
   googleoauth:
     secret: secret
     sessionname: oauth
-    credfile: clientid.google.json
+    oauthclientid: change_me
+    oauthsecret: change_me
 model:
   localchallengespath: etc/challenges
 checker:

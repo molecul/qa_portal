@@ -48,18 +48,11 @@ func randToken() string {
 }
 
 // Setup the authorization path
-func Setup(redirectURL, credFile string, scopes []string, secret []byte) {
+func Setup(redirectURL, OAuthClientId, OAuthSecret string, scopes []string, secret []byte) {
 	store = sessions.NewCookieStore(secret)
-	var c Credentials
-	file, err := ioutil.ReadFile(credFile)
-	if err != nil {
-		glog.Fatalf("[Gin-OAuth] File error: %v\n", err)
-	}
-	json.Unmarshal(file, &c)
-
 	conf = &oauth2.Config{
-		ClientID:     c.ClientID,
-		ClientSecret: c.ClientSecret,
+		ClientID:     OAuthClientId,
+		ClientSecret: OAuthSecret,
 		RedirectURL:  redirectURL,
 		Scopes:       scopes,
 		Endpoint:     google.Endpoint,
