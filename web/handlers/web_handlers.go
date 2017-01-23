@@ -80,8 +80,8 @@ func DockerHealthCheckHandler(c *gin.Context) {
 		c.JSON(http.StatusOK,
 			gin.H{
 				"exitcode": task.Result.ExitCode,
-				"stdout": task.Result.Stdout,
-				"stderr": task.Result.Stderr})
+				"stdout": task.Result.Stdout.String(),
+				"stderr": task.Result.Stderr.String()})
 	}
 	cancel()
 }
