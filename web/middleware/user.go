@@ -48,3 +48,9 @@ func UserSessionSet(c *gin.Context, userid int64) {
 	session.Set(userIdKey, userid)
 	session.Save()
 }
+
+func UserLogout(c *gin.Context) {
+	session := sessions.Default(c)
+	session.Clear()
+	session.Save()
+}

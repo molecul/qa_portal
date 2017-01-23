@@ -93,10 +93,10 @@ func (cfg *Configuration) initRoutes(r *gin.Engine) {
 
 	auth := r.Group("/auth")
 	auth.Use(google.Auth())
-	auth.GET("/", webHandlers.UserLoginHandler())
+	auth.GET("/", webHandlers.UserLoginHandler)
 
 	// Deauth section
-	r.GET("/logout", webHandlers.UserLogoutHandler(cfg.GoogleOAuth.SessionName))
+	r.GET("/logout", webHandlers.UserLogoutHandler)
 
 	// Api section
 	api := r.Group("/api")

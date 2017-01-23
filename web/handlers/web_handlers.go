@@ -12,7 +12,6 @@ import (
 	"github.com/molecul/qa_portal/model"
 	"github.com/molecul/qa_portal/web/middleware"
 	"github.com/zalando/gin-oauth2/google"
-	"github.com/gin-gonic/contrib/sessions"
 )
 
 func doError(ctx *gin.Context, err error) {
@@ -52,13 +51,9 @@ func UserLoginHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"Hello": "from private", "user": gu, "internal_user": usr})
 }
 
-func UserLogoutHandler (SessionName string) gin.HandlerFunc {
-	fn := func(ctx *gin.Context) {
-		current_session := sessions.Default(ctx)
-		current_session.Delete(SessionName)
-		ctx.Redirect(http.StatusMovedPermanently, "/")
-	}
-	return gin.HandlerFunc(fn)
+func UserLogoutHandler(ctx *gin.Context) {
+	middleware.UserLogout(ctx)
+	ctx.Redirect(http.StatusMovedPermanently, "/")
 }
 
 func MainPageHandler(c *gin.Context) {
