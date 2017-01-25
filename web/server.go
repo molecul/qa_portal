@@ -6,10 +6,10 @@ import (
 	"sync"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/molecul/qa_portal/web/handlers"
-	"github.com/molecul/qa_portal/web/middleware"
-	"github.com/molecul/qa_portal/web/middleware/oauth2"
+	"github.com/molecul/qa_portal/web/middleware/auth"
 )
 
 var googleScopes = []string{
@@ -75,8 +75,7 @@ func (c *Configuration) runServer(handlers http.Handler, isTls bool) (err error)
 }
 
 func (cfg *Configuration) setupGoogle() {
-	gc := &cfg.GoogleOAuth
-	google.Setup(cfg.getHostname()+"/auth/", gc.OAuthClientId, gc.OAuthSecret, googleScopes, []byte(gc.Secret))
+	auth.Setup(cfg.getHostname()+"/auth/", cfg.GoogleOAuth.OAuthClientId, cfg.GoogleOAuth.OAuthSecret, googleScopes)
 }
 
 func (cfg *Configuration) initRoutes(r *gin.Engine) {
@@ -84,28 +83,22 @@ func (cfg *Configuration) initRoutes(r *gin.Engine) {
 
 	r.StaticFS("/static", http.Dir("./web/static"))
 
-	r.Use(google.Session(cfg.GoogleOAuth.SessionName))
-	r.Use(middleware.User())
+	r.Use(sessions.Sessions("session", sessions.NewCookieStore([]byte(cfg.GoogleOAuth.Secret))))
+	r.Use(auth.UserMiddleware())
 
-	r.GET("/", webHandlers.MainPageHandler)
+	r.GET("/", handlers.MainPageHandler)
 
 	// Auth section
-	r.GET("/login", google.LoginHandler)
-
-	auth := r.Group("/auth")
-	auth.Use(google.Auth())
-	auth.GET("/", webHandlers.UserLoginHandler)
-
-	// Deauth section
-	r.GET("/logout", webHandlers.UserLogoutHandler)
+	r.GET("/auth", auth.AuthRedirectHandler())
+	r.GET("/login", handlers.LoginHandler)
+	r.GET("/logout", handlers.LogoutHandler)
 
 	// Api section
 	api := r.Group("/api")
-	api.GET("/healthcheck", middleware.UserMust(webHandlers.DockerHealthCheckHandler))
-	api.GET("/userinfo", middleware.UserMust(func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{"user": middleware.UserFromContext(ctx)})
+	api.GET("/healthcheck", auth.LoginRequired(handlers.DockerHealthCheckHandler))
+	api.GET("/userinfo", auth.LoginRequired(func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{"user": auth.GetUser(ctx)})
 	}))
-
 }
 
 func Run(cfg *Configuration) {

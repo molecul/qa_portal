@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/molecul/qa_portal/util/database"
-	"github.com/molecul/qa_portal/web/middleware/oauth2"
 )
 
 type User struct {
@@ -54,12 +53,4 @@ func CreateUser(u *User) error {
 func (u *User) Update() error {
 	_, err := database.Get().Id(u.ID).AllCols().Update(u)
 	return err
-}
-
-func (u *User) FillFromGoogle(gu *google.User) *User {
-	u.Email = strings.ToLower(gu.Email)
-	u.EmailVerified = gu.EmailVerified
-	u.Name = gu.Name
-	u.Picture = gu.Picture
-	return u
 }
