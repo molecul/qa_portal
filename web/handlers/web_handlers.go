@@ -48,12 +48,12 @@ func UserLoginHandler(ctx *gin.Context) {
 		}
 	}
 	middleware.UserSessionSet(ctx, usr.ID)
-	ctx.Redirect(http.StatusMovedPermanently, "/")
+	ctx.Redirect(http.StatusFound, "/")
 }
 
 func UserLogoutHandler(ctx *gin.Context) {
 	middleware.UserLogout(ctx)
-	ctx.Redirect(http.StatusMovedPermanently, "/")
+	ctx.Redirect(http.StatusFound, "/")
 }
 
 func MainPageHandler(c *gin.Context) {
