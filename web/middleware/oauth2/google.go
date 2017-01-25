@@ -68,7 +68,22 @@ func LoginHandler(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 	session.Set("state", state)
 	session.Save()
-	ctx.Redirect(http.StatusPermanentRedirect, GetLoginURL(state))
+	redirectPath := GetLoginURL(state)
+	ctx.Writer.Write([]byte(`<!DOCTYPE HTML>
+<html lang="en-US">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="refresh" content="1; url=` + redirectPath + `">
+        <script type="text/javascript">
+            window.location.href = "` + redirectPath + `"
+        </script>
+        <title>Page Redirection</title>
+    </head>
+    <body>
+        <!-- Note: don't tell people to click the link, just tell them that it is a link. -->
+        If you are not redirected automatically, follow this <a href='` + redirectPath + `'>link to redirect</a>.
+    </body>
+</html>`))
 }
 
 func GetLoginURL(state string) string {
