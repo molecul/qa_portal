@@ -49,12 +49,12 @@ func UserLoginHandler(ctx *gin.Context) {
 	}
 	middleware.UserSessionSet(ctx, usr.ID)
 
-	ctx.HTML(http.StatusOK, "redirect.html")
+	ctx.HTML(http.StatusOK, "redirect.html", gin.H{})
 }
 
 func UserLogoutHandler(ctx *gin.Context) {
 	middleware.UserLogout(ctx)
-	ctx.HTML(http.StatusOK, "redirect.html")
+	ctx.HTML(http.StatusOK, "redirect.html", gin.H{})
 }
 
 func MainPageHandler(c *gin.Context) {
