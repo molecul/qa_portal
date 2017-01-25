@@ -69,7 +69,7 @@ func LoginHandler(ctx *gin.Context) {
 	session.Set("state", state)
 	session.Save()
 	ctx.Redirect(http.StatusPermanentRedirect, GetLoginURL(state))
-	}
+}
 
 func GetLoginURL(state string) string {
 	return conf.AuthCodeURL(state)
@@ -81,6 +81,9 @@ func Auth() gin.HandlerFunc {
 		session := sessions.Default(ctx)
 		retrievedState := session.Get("state")
 		if retrievedState != ctx.Query("state") {
+			ctx.Header("P3P", "CP='INT NAV UNI'")
+			ctx.Header("Pragma", "no-cache")
+			ctx.Header("Cache-Control", "no-cache")
 			ctx.AbortWithError(http.StatusUnauthorized, fmt.Errorf("Invalid session state: %s", retrievedState))
 			return
 		}
@@ -94,6 +97,9 @@ func Auth() gin.HandlerFunc {
 		client := conf.Client(oauth2.NoContext, tok)
 		email, err := client.Get("https://www.googleapis.com/oauth2/v3/userinfo")
 		if err != nil {
+			ctx.Header("P3P", "CP='INT NAV UNI'")
+			ctx.Header("Pragma", "no-cache")
+			ctx.Header("Cache-Control", "no-cache")
 			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
@@ -101,6 +107,9 @@ func Auth() gin.HandlerFunc {
 		data, err := ioutil.ReadAll(email.Body)
 		if err != nil {
 			glog.Errorf("[Gin-OAuth] Could not read Body: %s", err)
+			ctx.Header("P3P", "CP='INT NAV UNI'")
+			ctx.Header("Pragma", "no-cache")
+			ctx.Header("Cache-Control", "no-cache")
 			ctx.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
@@ -109,6 +118,9 @@ func Auth() gin.HandlerFunc {
 		err = json.Unmarshal(data, &user)
 		if err != nil {
 			glog.Errorf("[Gin-OAuth] Unmarshal userinfo failed: %s", err)
+			ctx.Header("P3P", "CP='INT NAV UNI'")
+			ctx.Header("Pragma", "no-cache")
+			ctx.Header("Cache-Control", "no-cache")
 			ctx.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
