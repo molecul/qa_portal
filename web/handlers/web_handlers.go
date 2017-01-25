@@ -19,6 +19,13 @@ func doError(ctx *gin.Context, err error) {
 	panic(err)
 }
 
+func doSafeRedirect(ctx *gin.Context, path string) {
+	ctx.Header("P3P", "CP='INT NAV UNI'")
+	ctx.Header("Pragma", "no-cache")
+	ctx.Header("Cache-Control", "no-cache")
+	ctx.HTML(http.StatusOK, "redirect.html", gin.H{"Path": path})
+}
+
 func UserLoginHandler(ctx *gin.Context) {
 	gu := ctx.MustGet("user").(google.User)
 	usr, err := model.GetUserByEmail(gu.Email)
@@ -48,13 +55,12 @@ func UserLoginHandler(ctx *gin.Context) {
 		}
 	}
 	middleware.UserSessionSet(ctx, usr.ID)
-
-	ctx.HTML(http.StatusOK, "redirect.html", gin.H{})
+	doSafeRedirect(ctx, "/")
 }
 
 func UserLogoutHandler(ctx *gin.Context) {
 	middleware.UserLogout(ctx)
-	ctx.HTML(http.StatusOK, "redirect.html", gin.H{})
+	doSafeRedirect(ctx, "/")
 }
 
 func MainPageHandler(c *gin.Context) {
