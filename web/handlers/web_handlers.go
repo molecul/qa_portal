@@ -48,7 +48,7 @@ func UserLoginHandler(ctx *gin.Context) {
 		}
 	}
 	middleware.UserSessionSet(ctx, usr.ID)
-	ctx.JSON(http.StatusOK, gin.H{"Hello": "from private", "user": gu, "internal_user": usr})
+	ctx.Redirect(http.StatusMovedPermanently, "/")
 }
 
 func UserLogoutHandler(ctx *gin.Context) {
@@ -57,23 +57,23 @@ func UserLogoutHandler(ctx *gin.Context) {
 }
 
 func MainPageHandler(c *gin.Context) {
-	c.HTML(http.StatusOK, "index.html", gin.H{
-		"title": "Main website",
-	})
+	current_user := middleware.UserFromContext(c)
+	c.HTML(http.StatusOK, "index.html", gin.H{"title": "Main website",
+		"user": current_user})
 }
 
 func DockerHealthCheckHandler(c *gin.Context) {
 	temp_id, _ := strconv.Atoi(time.Now().Format("20060102150405"))
 	task := checker.Get().NewTask(&model.Challenge{
-		ID: 	    int64(temp_id),
-		Image:      "python:2.7",
-		TargetPath: "/tmp/task.py",
-		Cmd:        "echo \"Inside $CHECKER_FILE:\"; cat $CHECKER_FILE",
+		ID:           int64(temp_id),
+		Image:        "python:2.7",
+		TargetPath:   "/tmp/task.py",
+		Cmd:          "echo \"Inside $CHECKER_FILE:\"; cat $CHECKER_FILE",
 		InternalName: "test",
 	}, &model.Test{
 		ID:          int64(temp_id),
 		ChallengeID: int64(temp_id),
-		InputFile:   "healthcheck_"+strconv.FormatInt(int64(temp_id), 10),
+		InputFile:   "healthcheck_" + strconv.FormatInt(int64(temp_id), 10),
 	})
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
@@ -83,8 +83,7 @@ func DockerHealthCheckHandler(c *gin.Context) {
 	} else {
 
 		c.JSON(http.StatusOK,
-			gin.H{
-				"exitcode": task.Result.ExitCode,
+			gin.H{"exitcode": task.Result.ExitCode,
 				"stdout": task.Result.Stdout.String(),
 				"stderr": task.Result.Stderr.String()})
 	}
