@@ -1,0 +1,64 @@
+- project:
+    name: 'qa portal checks'
+    group:
+        - qa_portal-master:
+            branch_name: 'master'
+            project-pattern: 'molecul/qa_portal'
+            git_url: https://review.gerrithub.io/molecul/qa_portal
+    jobs:
+      - 'check-{group}'
+
+- job-template:
+    name: 'check-{group}'
+    project-type: freestyle
+    wrappers:
+      - ansicolor
+    builders:
+      - shell: "go build ."
+    node: qa_portal_workers
+    scm:
+      - git:
+          url: '{git_url}'
+          branches:
+              - $GERRIT_BRANCH
+          refspec: $GERRIT_REFSPEC
+          choosing-strategy: gerrit
+          skip-tag: true
+
+    triggers:
+      - gerrit:
+          trigger-on:
+            - patchset-created-event:
+                exclude-drafts: true
+                exclude-trivial-rebase: true
+                exclude-no-code-change: true
+            - comment-added-contains-event:
+                comment-contains-value: 'recheck'
+          projects:
+            - project-compare-type: 'PLAIN'
+              project-pattern: '{project-pattern}'
+              branches:
+                - branch-compare-type: 'PLAIN'
+                  branch-pattern: '{branch_name}'
+              # file-paths:
+              #     - compare-type: ANT
+              #       pattern: subdirectory/**
+              # topics:
+              #     - compare-type: ANT
+              #       pattern: refactor-xy**
+          # skip-vote:
+          #     successful: true
+          #     failed: true
+          #     unstable: true
+          #     notbuilt: true
+          # silent: false
+          # silent-start: true
+          # escape-quotes: false
+          # no-name-and-email: false
+          # dependency-jobs: 'job1, job2'
+          # notification-level: ALL
+          # dynamic-trigger-enabled: true
+          # dynamic-trigger-url: http://myhost/mytrigger
+          # trigger-for-unreviewed-patches: true
+          # server-name: __ANY__
+          # failure-message-file: check.log
