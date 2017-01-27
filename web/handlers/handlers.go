@@ -15,7 +15,7 @@ import (
 
 func MainPageHandler(ctx *gin.Context) {
 	current_user := auth.GetUser(ctx)
-	ctx.HTML(http.StatusOK, "index.html", gin.H{"title": "Main website",
+	ctx.HTML(http.StatusOK, "pages/index", gin.H{"title": "Main website",
 		"user": current_user})
 }
 
