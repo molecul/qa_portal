@@ -96,6 +96,7 @@ func (cfg *Configuration) initRoutes(r *gin.Engine) {
 	r.GET("/auth", auth.AuthRedirectHandler())
 	r.GET("/login", handlers.LoginHandler)
 	r.GET("/logout", handlers.LogoutHandler)
+	r.GET("/challenges", handlers.ChallengesWebHandler)
 
 	// Api section
 	api := r.Group("/api")
