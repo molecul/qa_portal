@@ -96,6 +96,7 @@ func (cfg *Configuration) initRoutes(r *gin.Engine) {
 	r.GET("/auth", auth.AuthRedirectHandler())
 	r.GET("/login", handlers.LoginHandler)
 	r.GET("/logout", handlers.LogoutHandler)
+	r.GET("/challenges", handlers.ChallengesWebHandler)
 
 	// Api section
 	api := r.Group("/api")
@@ -104,7 +105,7 @@ func (cfg *Configuration) initRoutes(r *gin.Engine) {
 		ctx.JSON(http.StatusOK, gin.H{"user": auth.GetUser(ctx)})
 	}))
 	api.GET("/users", auth.LoginRequired(handlers.UsersHandler))
-	api.GET("/challenges", handlers.ChallengesHandler)
+	api.GET("/challenges?order=*order", handlers.ChallengesHandler)
 }
 
 func Run(cfg *Configuration) {
