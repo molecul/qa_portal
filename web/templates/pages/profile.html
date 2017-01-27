@@ -1,0 +1,43 @@
+{{ define "content" }}
+      <div class="row">
+        <div class="main">
+          <h1 class="page-header">Profile</h1>
+
+          <div class="row placeholders">
+                <div class="row">
+                    <div class="col-sm-6 col-md-3">
+                        <img src="{{ .user.Picture }}" alt="{{ .user.Name }} photo's" class="img-rounded img-responsive" />
+                    </div>
+                    <div class="col-sm-6 col-md-8">
+                        <h4>{{ .user.Name }}</h4><br>
+                        <p>
+                            <i class="glyphicon glyphicon-envelope"></i>{{ .user.Edit }}
+                        </p>
+                        <p>
+                            <i class="glyphicon glyphicon-globe"></i>Score: {{ .user.Score }}
+                        </p>
+                    </div>
+                </div>
+          </div>
+
+          <h2 class="sub-header">History</h2>
+          <div class="table-responsive">
+                <table data-toggle="table"
+                       data-url="/api/history"
+                       data-search="false"
+                       data-show-refresh="false"
+                       data-show-toggle="false"
+                       data-show-columns="false">
+                    <thead>
+                        <tr>
+							<th data-field="Date">Date</th>
+							<th data-field="Attempt">Attempt</th>
+							<th data-field="Task">Task</th>
+							<th data-field="Rxust">Result</th>
+                        </tr>
+                    </thead>
+                </table>
+          </div>
+        </div>
+      </div>
+{{ end }}
