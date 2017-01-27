@@ -19,6 +19,16 @@ func MainPageHandler(ctx *gin.Context) {
 		"user": current_user})
 }
 
+func ChallengesWebHandler(ctx *gin.Context) {
+	current_user := auth.GetUser(ctx)
+	ctx.HTML(http.StatusOK, "pages/challenges", gin.H{"user": current_user})
+}
+
+func UsersWebHandler(ctx *gin.Context) {
+	current_user := auth.GetUser(ctx)
+	ctx.HTML(http.StatusOK, "pages/scoreboard", gin.H{"user": current_user})
+}
+
 func LoginHandler(ctx *gin.Context) {
 	auth.Login(ctx, "/")
 }
@@ -28,13 +38,15 @@ func LogoutHandler(ctx *gin.Context) {
 }
 
 func UsersHandler(ctx *gin.Context) {
-	users, _ := model.Users(0, 1000)
-	ctx.JSON(http.StatusOK, gin.H{"users": users})
+	order := ctx.Param("order")
+	users, _ := model.Users(0, 1000, order)
+	ctx.JSON(http.StatusOK, users)
 }
 
 func ChallengesHandler(ctx *gin.Context) {
-	challenges, _ := model.Challenges(0, 1000)
-	ctx.JSON(http.StatusOK, gin.H{"challenges": challenges})
+	order := ctx.Param("order")
+	challenges, _ := model.Challenges(0, 1000, order)
+	ctx.JSON(http.StatusOK, challenges)
 }
 
 func DockerHealthCheckHandler(c *gin.Context) {
