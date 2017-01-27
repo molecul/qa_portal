@@ -7,7 +7,7 @@ import (
 )
 
 type Challenge struct {
-	ID           int64  `xorm:"pk autoincr"`
+	ID           int64  `xorm:"pk autoincr 'id'"`
 	Name         string `xorm:"not null"`
 	InternalName string `xorm:"unique not null"`
 	Image        string // Docker image name
@@ -73,5 +73,5 @@ func (c *Challenge) UpdateWithInfoFrom(o *Challenge) error {
 
 func Challenges(page, pageSize int) ([]*Challenge, error) {
 	challenges := make([]*Challenge, 0, pageSize)
-	return challenges, database.Get().Limit(pageSize, (page-1)*pageSize).Asc("ID").Find(&challenges)
+	return challenges, database.Get().Limit(pageSize, (page-1)*pageSize).Asc("id").Find(&challenges)
 }
