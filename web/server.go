@@ -99,6 +99,8 @@ func (cfg *Configuration) initRoutes(r *gin.Engine) {
 	api.GET("/userinfo", auth.LoginRequired(func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{"user": auth.GetUser(ctx)})
 	}))
+	api.GET("/users", auth.LoginRequired(handlers.UsersHandler))
+	api.GET("/challenges", handlers.ChallengesHandler)
 }
 
 func Run(cfg *Configuration) {
