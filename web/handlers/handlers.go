@@ -19,6 +19,11 @@ func MainPageHandler(ctx *gin.Context) {
 		"user": current_user})
 }
 
+func ChallengesWebHandler(ctx *gin.Context) {
+	current_user := auth.GetUser(ctx)
+	ctx.HTML(http.StatusOK, "pages/challenges", gin.H{"user": current_user})
+}
+
 func LoginHandler(ctx *gin.Context) {
 	auth.Login(ctx, "/")
 }
@@ -34,7 +39,7 @@ func UsersHandler(ctx *gin.Context) {
 
 func ChallengesHandler(ctx *gin.Context) {
 	challenges, _ := model.Challenges(0, 1000)
-	ctx.JSON(http.StatusOK, gin.H{"challenges": challenges})
+	ctx.JSON(http.StatusOK, challenges)
 }
 
 func DockerHealthCheckHandler(c *gin.Context) {
