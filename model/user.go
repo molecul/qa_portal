@@ -55,7 +55,13 @@ func (u *User) Update() error {
 	return err
 }
 
-func Users(page, pageSize int) ([]*User, error) {
+func Users(page, pageSize int, order string) ([]*User, error) {
 	users := make([]*User, 0, pageSize)
-	return users, database.Get().Limit(pageSize, (page-1)*pageSize).Asc("id").Find(&users)
+
+	if order == "asc" {
+		return users, database.Get().Limit(pageSize, (page-1)*pageSize).Asc("score").Find(&users)
+	} else {
+		return users, database.Get().Limit(pageSize, (page-1)*pageSize).Desc("score").Find(&users)
+	}
+
 }
