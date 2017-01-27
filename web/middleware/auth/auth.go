@@ -90,6 +90,10 @@ func userDataUpdate(ctx *gin.Context, gu *User, session sessions.Session) {
 			views.RenderError(ctx, err)
 			return
 		}
+		if usr, err = model.GetUserByEmail(gu.Email); err != nil {
+			views.RenderError(ctx, err)
+			return
+		}
 	} else {
 		if err = gu.FillUserInfo(usr).Update(); err != nil {
 			views.RenderError(ctx, err)
