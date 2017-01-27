@@ -1,13 +1,72 @@
 package model
 
+import (
+	"time"
+
+	"github.com/molecul/qa_portal/util/database"
+)
+
 type Challenge struct {
 	ID           int64  `xorm:"pk autoincr"`
-	Name         string `xorm:"varchar(64) not null"`
-	InternalName string `xorm:"varchar(64) unique not null"`
-	Image        string `xorm:"varchar(64)"` // Docker image name
-	TargetPath   string `xorm:"varchar(64)"` // Where file with been stored in container
-	Cmd          string `xorm:"varchar(64)"` // Command to check answer. Can be null
+	Name         string `xorm:"not null"`
+	InternalName string `xorm:"unique not null"`
+	Image        string // Docker image name
+	TargetPath   string // Where file with been stored in container
+	Cmd          string // Command to check answer. Can be null
 	Description  string
 	Points       int64
-	FromDB       bool `xorm:"-"`
+	Created      time.Time `xorm:"created"`
+}
+
+func GetChallengeById(id int64) (*Challenge, error) {
+	c := new(Challenge)
+	has, err := database.Get().Id(id).Get(c)
+	if err != nil {
+		return nil, err
+	}
+	if !has {
+		return nil, nil
+	}
+	return c, nil
+}
+
+func GetChallengeByInternalName(name string) (*Challenge, error) {
+	c := &Challenge{InternalName: name}
+	has, err := database.Get().Get(c)
+	if err != nil {
+		return nil, err
+	}
+	if !has {
+		return nil, nil
+	}
+	return c, nil
+}
+
+func CreateChallenge(c *Challenge) error {
+	_, err := database.Get().InsertOne(c)
+	return err
+}
+
+func (c *Challenge) Update() error {
+	_, err := database.Get().Id(c.ID).AllCols().Update(c)
+	return err
+}
+
+func (c *Challenge) IsEqual(o *Challenge) bool {
+	return c.Name == o.Name &&
+		c.Image == o.Image &&
+		c.TargetPath == o.TargetPath &&
+		c.Cmd == o.Cmd &&
+		c.Description == o.Description &&
+		c.Points == o.Points
+}
+
+func (c *Challenge) UpdateWithInfoFrom(o *Challenge) error {
+	c.Name = o.Name
+	c.Image = o.Image
+	c.TargetPath = o.TargetPath
+	c.Cmd = o.Cmd
+	c.Description = o.Description
+	c.Points = o.Points
+	return c.Update()
 }

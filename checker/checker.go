@@ -6,9 +6,11 @@ import (
 )
 
 type Configuration struct {
-	Endpoint string // docker socket path
-	Timeout  int    // docker run timeout in milliseconds
-	Threads  int    // docker runs in one time
+	Endpoint       string // docker socket path
+	Timeout        int    // docker run timeout in milliseconds
+	Threads        int    // docker runs in one time
+	ChallengesPath string // path to etc/challenges folder
+	ImagesPath     string // path to etc/challenges folder
 }
 
 type Checker struct {
@@ -32,7 +34,7 @@ func Init(cfg *Configuration) (err error) {
 		return
 	}
 	checker = c
-	return
+	return c.syncLocalChallenges(cfg.ChallengesPath)
 }
 
 func (c *Checker) CheckTest(challenge *model.Challenge, test *model.Test) {

@@ -14,10 +14,12 @@ web:
     oauthclientid: change_me
     oauthsecret: change_me
 model:
-  localchallengespath: etc/challenges
 checker:
   endpoint: unix:///var/run/docker.sock
+  challengespath: etc/challenges
+  imagespath: etc/images
   timeout: 0
   threads: 0
 database:
   driver: sqlite3
+  dsn: _db.sqlite3

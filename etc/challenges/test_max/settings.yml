@@ -2,3 +2,5 @@ name: Test maximum
 image: images/pytest
 # if cmd not specifed, used image cmd
 cmd: "./check.sh"
+points: 100
+targetpath: answer.py
