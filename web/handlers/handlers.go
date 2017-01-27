@@ -19,6 +19,10 @@ func MainPageHandler(ctx *gin.Context) {
 		"user": current_user})
 }
 
+func ChallengesWebHandler(ctx *gin.Context) {
+	ctx.HTML(http.StatusOK, "pages/challenges", "")
+}
+
 func LoginHandler(ctx *gin.Context) {
 	auth.Login(ctx, "/")
 }
