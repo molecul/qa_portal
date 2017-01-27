@@ -8,7 +8,7 @@ import (
 )
 
 type User struct {
-	ID            int64 `xorm:"pk autoincr"`
+	ID            int64 `xorm:"pk autoincr 'id'"`
 	Score         int64
 	Created       time.Time `xorm:"created"`
 	Updated       time.Time `xorm:"updated"`
@@ -57,5 +57,5 @@ func (u *User) Update() error {
 
 func Users(page, pageSize int) ([]*User, error) {
 	users := make([]*User, 0, pageSize)
-	return users, database.Get().Limit(pageSize, (page-1)*pageSize).Asc("ID").Find(&users)
+	return users, database.Get().Limit(pageSize, (page-1)*pageSize).Asc("id").Find(&users)
 }
