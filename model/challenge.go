@@ -70,3 +70,8 @@ func (c *Challenge) UpdateWithInfoFrom(o *Challenge) error {
 	c.Points = o.Points
 	return c.Update()
 }
+
+func Challenges(page, pageSize int) ([]*Challenge, error) {
+	challenges := make([]*Challenge, 0, pageSize)
+	return challenges, database.Get().Limit(pageSize, (page-1)*pageSize).Asc("ID").Find(&challenges)
+}
