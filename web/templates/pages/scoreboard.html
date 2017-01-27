@@ -1,0 +1,24 @@
+{{ define "content" }}
+    <div class="row">
+        <div class="main">
+            <h1 class="page-header">Challenges</h1>
+            <div class="table-responsive">
+                <table data-toggle="table"
+                       data-url="/api/users"
+                       data-search="true"
+                       data-show-refresh="true"
+                       data-show-toggle="false"
+                       data-show-columns="false">
+                    <thead>
+                        <tr>
+                            <th data-field="ID">Id</th>
+                            <th data-field="Name">Name</th>
+                            <th data-field="Score">Score</th>
+							 <th data-field="Email">Email</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+{{ end }}

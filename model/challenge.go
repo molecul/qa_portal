@@ -71,7 +71,12 @@ func (c *Challenge) UpdateWithInfoFrom(o *Challenge) error {
 	return c.Update()
 }
 
-func Challenges(page, pageSize int) ([]*Challenge, error) {
+func Challenges(page, pageSize int, order string) ([]*Challenge, error) {
 	challenges := make([]*Challenge, 0, pageSize)
-	return challenges, database.Get().Limit(pageSize, (page-1)*pageSize).Asc("id").Find(&challenges)
+
+	if order == "asc" {
+		return challenges, database.Get().Limit(pageSize, (page-1)*pageSize).Asc("score").Find(&challenges)
+	} else {
+		return challenges, database.Get().Limit(pageSize, (page-1)*pageSize).Desc("score").Find(&challenges)
+	}
 }
