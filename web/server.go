@@ -8,6 +8,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
+	eztemplate "github.com/michelloworld/ez-gin-template"
 	"github.com/molecul/qa_portal/web/handlers"
 	"github.com/molecul/qa_portal/web/middleware/auth"
 )
@@ -79,7 +80,10 @@ func (cfg *Configuration) setupGoogle() {
 }
 
 func (cfg *Configuration) initRoutes(r *gin.Engine) {
-	r.LoadHTMLGlob("./web/templates/*")
+	render := eztemplate.New()
+	render.TemplatesDir = "web/templates/"
+	render.Layout = "base"
+	r.HTMLRender = render.Init()
 
 	r.StaticFS("/static", http.Dir("./web/static"))
 
