@@ -27,6 +27,16 @@ func LogoutHandler(ctx *gin.Context) {
 	auth.Logout(ctx, "/")
 }
 
+func UsersHandler(ctx *gin.Context) {
+	users, _ := model.Users(0, 1000)
+	ctx.JSON(http.StatusOK, users)
+}
+
+func ChallengesHandler(ctx *gin.Context) {
+	challenges, _ := model.Challenges(0, 1000)
+	ctx.JSON(http.StatusOK, challenges)
+}
+
 func DockerHealthCheckHandler(c *gin.Context) {
 	temp_id := time.Now().Unix()
 	task := checker.Get().NewTask(&model.Challenge{

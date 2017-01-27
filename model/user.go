@@ -54,3 +54,8 @@ func (u *User) Update() error {
 	_, err := database.Get().Id(u.ID).AllCols().Update(u)
 	return err
 }
+
+func Users(page, pageSize int) ([]*User, error) {
+	users := make([]*User, 0, pageSize)
+	return users, database.Get().Limit(pageSize, (page-1)*pageSize).Where("type=0").Asc("id").Find(&users)
+}
