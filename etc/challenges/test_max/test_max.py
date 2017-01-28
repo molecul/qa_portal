@@ -8,4 +8,4 @@ import answer
     (["foo", "15"], 15),
 ])
 def test_answer_correct(numbers, expected):
-assert answer.get_max(numbers) == expected
+    assert answer.get_max(numbers) == expected

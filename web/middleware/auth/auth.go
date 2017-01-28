@@ -8,11 +8,13 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
 	"github.com/molecul/qa_portal/model"
+	"github.com/molecul/qa_portal/util/isdebug"
 	"github.com/molecul/qa_portal/web/views"
 
 	"golang.org/x/oauth2"
@@ -44,6 +46,8 @@ func (gu *User) FillUserInfo(u *model.User) *model.User {
 var conf *oauth2.Config
 var userIdKey = "model.user.id"
 var userKey = "model.user"
+var expiredTimeKey = "expire"
+var sessionDuration time.Duration
 
 func randToken() string {
 	b := make([]byte, 32)
@@ -52,7 +56,8 @@ func randToken() string {
 }
 
 // Setup the authorization path
-func Setup(redirectURL, clientId, clientSecret string, scopes []string) {
+func Setup(redirectURL, clientId, clientSecret string, scopes []string, sessionExpireDuration time.Duration) {
+	sessionDuration = sessionExpireDuration
 	conf = &oauth2.Config{
 		ClientID:     clientId,
 		ClientSecret: clientSecret,
@@ -65,6 +70,14 @@ func Setup(redirectURL, clientId, clientSecret string, scopes []string) {
 func Login(ctx *gin.Context, redirect string) {
 	state := randToken()
 	session := sessions.Default(ctx)
+	if isdebug.Is {
+		session.Set(userIdKey, model.GetDebugUser().Id)
+		expireTime, _ := time.Now().Add(sessionDuration).MarshalText()
+		session.Set(expiredTimeKey, string(expireTime))
+		session.Save()
+		views.RenderRedirect(ctx, redirect)
+		return
+	}
 	session.Set("state", state)
 	session.Set("redirect", redirect)
 	session.Save()
@@ -100,7 +113,7 @@ func userDataUpdate(ctx *gin.Context, gu *User, session sessions.Session) {
 			return
 		}
 	}
-	session.Set(userIdKey, usr.ID)
+	session.Set(userIdKey, usr.Id)
 }
 
 func googleUserFromAuthHandler(ctx *gin.Context, session sessions.Session) *User {
@@ -157,6 +170,8 @@ func AuthRedirectHandler() gin.HandlerFunc {
 
 		session.Delete("state")
 		session.Delete("redirect")
+		expireTime, _ := time.Now().Add(sessionDuration).MarshalText()
+		session.Set(expiredTimeKey, string(expireTime))
 		session.Save()
 
 		views.RenderRedirect(ctx, redirectTarget)
@@ -184,13 +199,25 @@ func LoginRequired(h gin.HandlerFunc) gin.HandlerFunc {
 func UserMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		session := sessions.Default(ctx)
-		userId := session.Get(userIdKey)
-		if userId != nil {
-			usr, err := model.GetUserById(userId.(int64))
-			if err != nil {
-				panic(err)
+		expired := session.Get(expiredTimeKey)
+		if expired != nil {
+			var expiredTime time.Time
+			err := expiredTime.UnmarshalText([]byte(expired.(string)))
+			if err != nil || expiredTime.Before(time.Now()) {
+				session.Delete(expiredTimeKey)
+				session.Delete(userIdKey)
+				session.Save()
+			} else {
+				userId := session.Get(userIdKey)
+				if userId != nil {
+					usr, err := model.GetUserById(userId.(int64))
+					if err != nil {
+						panic(err)
+					}
+					ctx.Set(userKey, usr)
+				}
 			}
-			ctx.Set(userKey, usr)
 		}
+		ctx.Next()
 	}
 }
