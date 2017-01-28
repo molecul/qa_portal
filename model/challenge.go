@@ -7,13 +7,14 @@ import (
 )
 
 type Challenge struct {
-	ID           int64  `xorm:"pk autoincr 'id'"`
+	Id           int64  `xorm:"pk autoincr"`
 	Name         string `xorm:"not null"`
 	InternalName string `xorm:"unique not null"`
-	Image        string // Docker image name
-	TargetPath   string // Where file with been stored in container
-	Cmd          string // Command to check answer. Can be null
-	Description  string
+	Image        string `json:"-"` // Docker image name
+	TargetPath   string `json:"-"` // Where file with been stored in container
+	Cmd          string `json:"-"` // Command to check answer. Can be null
+	Inject       string `json:"-"`
+	Description  string `json:"-"`
 	Points       int64
 	Created      time.Time `xorm:"created"`
 }
@@ -48,7 +49,7 @@ func CreateChallenge(c *Challenge) error {
 }
 
 func (c *Challenge) Update() error {
-	_, err := database.Get().Id(c.ID).AllCols().Update(c)
+	_, err := database.Get().Id(c.Id).AllCols().Update(c)
 	return err
 }
 
@@ -58,7 +59,8 @@ func (c *Challenge) IsEqual(o *Challenge) bool {
 		c.TargetPath == o.TargetPath &&
 		c.Cmd == o.Cmd &&
 		c.Description == o.Description &&
-		c.Points == o.Points
+		c.Points == o.Points &&
+		c.Inject == o.Inject
 }
 
 func (c *Challenge) UpdateWithInfoFrom(o *Challenge) error {
@@ -68,6 +70,7 @@ func (c *Challenge) UpdateWithInfoFrom(o *Challenge) error {
 	c.Cmd = o.Cmd
 	c.Description = o.Description
 	c.Points = o.Points
+	c.Inject = o.Inject
 	return c.Update()
 }
 

@@ -12,8 +12,7 @@ Output:
 
 You should implement function `get_max`:
 
-```python
-
+``` python
 def get_max(numbers):
     # your logic
     return max_number

@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 	eztemplate "github.com/michelloworld/ez-gin-template"
+	"github.com/molecul/qa_portal/util/isdebug"
 	"github.com/molecul/qa_portal/web/handlers"
 	"github.com/molecul/qa_portal/web/middleware/auth"
 )
@@ -20,10 +22,11 @@ var googleScopes = []string{
 }
 
 type GoogleOAuthConfig struct {
-	Secret        string
-	SessionName   string
-	OAuthClientId string
-	OAuthSecret   string
+	Secret          string
+	SessionName     string
+	OAuthClientId   string
+	OAuthSecret     string
+	SessionDuration time.Duration
 }
 
 type Configuration struct {
@@ -76,13 +79,17 @@ func (c *Configuration) runServer(handlers http.Handler, isTls bool) (err error)
 }
 
 func (cfg *Configuration) setupGoogle() {
-	auth.Setup(cfg.getHostname()+"/auth/", cfg.GoogleOAuth.OAuthClientId, cfg.GoogleOAuth.OAuthSecret, googleScopes)
+	auth.Setup(cfg.getHostname()+"/auth/", cfg.GoogleOAuth.OAuthClientId, cfg.GoogleOAuth.OAuthSecret,
+		googleScopes, cfg.GoogleOAuth.SessionDuration*time.Second)
 }
 
 func (cfg *Configuration) initRoutes(r *gin.Engine) {
 	render := eztemplate.New()
 	render.TemplatesDir = "web/templates/"
 	render.Layout = "base"
+	if isdebug.Is {
+		render.Debug = true
+	}
 	r.HTMLRender = render.Init()
 
 	r.StaticFS("/static", http.Dir("./web/static"))
@@ -99,6 +106,9 @@ func (cfg *Configuration) initRoutes(r *gin.Engine) {
 	r.GET("/challenges", handlers.ChallengesWebHandler)
 	r.GET("/scoreboard", handlers.ScoreboardHandler)
 	r.GET("/profile", auth.LoginRequired(handlers.ProfileHandler))
+	r.GET("/solve/:challenge", auth.LoginRequired(handlers.SolveHandlerGet))
+	r.POST("/solve/:challenge", auth.LoginRequired(handlers.SolveHandlerPost))
+	r.GET("/test/:test", auth.LoginRequired(handlers.TestHandler))
 
 	// Api section
 	api := r.Group("/api")
@@ -111,6 +121,9 @@ func (cfg *Configuration) initRoutes(r *gin.Engine) {
 }
 
 func Run(cfg *Configuration) {
+	if !isdebug.Is {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	r := gin.Default()
 
 	cfg.setupGoogle()

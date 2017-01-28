@@ -1,11 +1,9 @@
 {{ define "head" }}
 	<meta charset="UTF-8">
 	<meta http-equiv="refresh" content="1; url={{ .Path }}">
-	<script type="text/javascript">
-	    window.location.href = "{{ .Path }}"
-	</script>
+	<script type="text/javascript">window.location.href = "{{ .Path }}"</script>
 	<title>Page Redirection</title>
 {{ end }}
 {{ define "body" }}
-If you are not redirected automatically, follow this <a href='{{ .Path }}'>link to example</a>.
+If you are not redirected automatically, follow <a href='{{ .Path }}'>this link</a>.
 {{ end }}

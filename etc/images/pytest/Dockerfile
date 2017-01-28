@@ -5,6 +5,7 @@ RUN pip install pytest coverage
 RUN mkdir /opt/sandbox
 
 ADD check.sh /opt/sandbox
+ADD test_max.py /opt/sandbox
 WORKDIR /opt/sandbox
 
 CMD ["./check.sh"]
