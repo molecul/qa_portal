@@ -1,6 +1,9 @@
 name: Test maximum
-image: images/pytest
+image: pytest
 # if cmd not specifed, used image cmd
-cmd: "./check.sh"
+#cmd: "./check.sh"
+#cmd: "pwd; ls -la"
+cmd: bash check.sh
 points: 100
-targetpath: answer.py
+targetpath: /opt/sandbox/answer.py
+inject: test_max.py:/opt/sandbox/test_max.py,README.md:/opt/sandbox/README.md

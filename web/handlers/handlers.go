@@ -1,36 +1,106 @@
 package handlers
 
 import (
-	"context"
 	"fmt"
+	"html/template"
+	"io/ioutil"
 	"net/http"
-	"time"
+	"strconv"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/molecul/qa_portal/checker"
 	"github.com/molecul/qa_portal/model"
 	"github.com/molecul/qa_portal/web/middleware/auth"
+	"github.com/molecul/qa_portal/web/views"
+	"github.com/shurcooL/github_flavored_markdown"
 )
 
 func MainPageHandler(ctx *gin.Context) {
-	current_user := auth.GetUser(ctx)
-	ctx.HTML(http.StatusOK, "pages/index", gin.H{"user": current_user})
+	ctx.HTML(http.StatusOK, "pages/index", gin.H{"user": auth.GetUser(ctx)})
 }
 
 func ChallengesWebHandler(ctx *gin.Context) {
-	current_user := auth.GetUser(ctx)
-	ctx.HTML(http.StatusOK, "pages/challenges", gin.H{"user": current_user})
+	ctx.HTML(http.StatusOK, "pages/challenges", gin.H{"user": auth.GetUser(ctx)})
 }
 
 func ProfileHandler(ctx *gin.Context) {
-	current_user := auth.GetUser(ctx)
-	ctx.HTML(http.StatusOK, "pages/profile", gin.H{"user": current_user})
+	ctx.HTML(http.StatusOK, "pages/profile", gin.H{"user": auth.GetUser(ctx)})
 }
 
 func ScoreboardHandler(ctx *gin.Context) {
-	current_user := auth.GetUser(ctx)
-	ctx.HTML(http.StatusOK, "pages/scoreboard", gin.H{"user": current_user})
+	ctx.HTML(http.StatusOK, "pages/scoreboard", gin.H{"user": auth.GetUser(ctx)})
+}
+
+func TestHandler(ctx *gin.Context) {
+	testId, err := strconv.ParseInt(ctx.Param("test"), 10, 0)
+	if err != nil {
+		views.RenderError(ctx, err)
+		return
+	}
+	test, err := model.GetTestById(testId)
+	if err != nil {
+		views.RenderError(ctx, err)
+		return
+	}
+	input, _ := ioutil.ReadFile(test.GetInputFileName())
+	output, _ := ioutil.ReadFile(test.GetOutputFileName())
+
+	// TODO
+	//ctx.HTML(http.StatusOK, "pages/test", )
+	ctx.JSON(http.StatusOK, gin.H{"user": auth.GetUser(ctx),
+		"test": test, "test_input": string(input), "test_output": string(output)})
+}
+
+func SolveHandlerGet(ctx *gin.Context) {
+	challengeId, err := strconv.ParseInt(ctx.Param("challenge"), 10, 0)
+	if err != nil {
+		views.RenderError(ctx, err)
+		return
+	}
+	challenge, err := model.GetChallengeById(challengeId)
+	if err != nil {
+		views.RenderError(ctx, err)
+		return
+	}
+	if challenge == nil {
+		ctx.Redirect(http.StatusFound, "/challenges")
+		return
+	}
+	description := template.HTML(github_flavored_markdown.Markdown([]byte(challenge.Description)))
+	ctx.HTML(http.StatusOK, "pages/solve", gin.H{
+		"user":        auth.GetUser(ctx),
+		"description": description})
+}
+
+func SolveHandlerPost(ctx *gin.Context) {
+	code := ctx.PostForm("code")
+	if code == "" {
+		views.RenderRedirect(ctx, ctx.Request.URL.String())
+		return
+	}
+	challengeId, err := strconv.ParseInt(ctx.Param("challenge"), 10, 0)
+	if err != nil {
+		views.RenderError(ctx, err)
+		return
+	}
+	challenge, err := model.GetChallengeById(challengeId)
+	if err != nil {
+		views.RenderError(ctx, err)
+		return
+	}
+	user := auth.GetUser(ctx)
+	test := &model.Test{
+		ChallengeId: challenge.Id,
+		UserId:      user.Id,
+	}
+
+	if err := model.CreateTest(test, []byte(code)); err != nil {
+		views.RenderError(ctx, err)
+		return
+	}
+	checker.Get().CollectorUpdater <- true
+
+	ctx.Redirect(http.StatusFound, fmt.Sprintf("/test/%d", test.Id))
 }
 
 func LoginHandler(ctx *gin.Context) {
@@ -39,42 +109,4 @@ func LoginHandler(ctx *gin.Context) {
 
 func LogoutHandler(ctx *gin.Context) {
 	auth.Logout(ctx, "/")
-}
-
-func UsersHandler(ctx *gin.Context) {
-	order := ctx.Param("order")
-	users, _ := model.Users(0, 1000, order)
-	ctx.JSON(http.StatusOK, users)
-}
-
-func ChallengesHandler(ctx *gin.Context) {
-	order := ctx.Param("order")
-	challenges, _ := model.Challenges(0, 1000, order)
-	ctx.JSON(http.StatusOK, challenges)
-}
-
-func DockerHealthCheckHandler(c *gin.Context) {
-	temp_id := time.Now().Unix()
-	task := checker.Get().NewTask(&model.Challenge{
-		ID:           temp_id,
-		Image:        "python:2.7",
-		TargetPath:   "/tmp/task.py",
-		Cmd:          "echo \"Inside $CHECKER_FILE:\"; cat $CHECKER_FILE",
-		InternalName: "test",
-	}, &model.Test{
-		ID:          temp_id,
-		ChallengeID: temp_id,
-		InputFile:   fmt.Sprintf("healthcheck_%v", temp_id),
-	})
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	if err := task.Do(ctx); err != nil {
-		c.JSON(http.StatusBadGateway, err.Error())
-		logrus.Print(err)
-	} else {
-		c.JSON(http.StatusOK, gin.H{"exitcode": task.Result.ExitCode,
-			"stdout": task.Result.Stdout.String(),
-			"stderr": task.Result.Stderr.String()})
-	}
-	cancel()
 }

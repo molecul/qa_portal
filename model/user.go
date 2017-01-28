@@ -5,20 +5,36 @@ import (
 	"time"
 
 	"github.com/molecul/qa_portal/util/database"
+	"github.com/molecul/qa_portal/util/isdebug"
 )
 
 type User struct {
-	ID            int64 `xorm:"pk autoincr 'id'"`
-	Score         int64
-	Created       time.Time `xorm:"created"`
-	Updated       time.Time `xorm:"updated"`
-	Email         string    `xorm:"unique"`
-	EmailVerified bool
+	Id            int64     `xorm:"pk notnull autoincr"`
+	Score         int64     `xorm:"notnull"`
+	Created       time.Time `xorm:"notnull created"`
+	Updated       time.Time `xorm:"notnull updated"`
+	Email         string    `xorm:"notnull unique" json:"-"`
+	EmailVerified bool      `json:"-"`
+	Name          string    `xorm:"notnull"`
 	Picture       string
-	Name          string
+}
+
+func GetDebugUser() *User {
+	return &User{
+		Id:            0xDEADBEAF,
+		Score:         0x31415234,
+		Created:       time.Now().Add(-time.Hour * 24),
+		Updated:       time.Now().Add(-time.Hour * 4),
+		Email:         "debug_user@domain.com",
+		EmailVerified: true,
+		Name:          "Debug User",
+	}
 }
 
 func GetUserById(id int64) (*User, error) {
+	if isdebug.Is && GetDebugUser().Id == id {
+		return GetDebugUser(), nil
+	}
 	u := new(User)
 	has, err := database.Get().Id(id).Get(u)
 	if err != nil {
@@ -32,6 +48,9 @@ func GetUserById(id int64) (*User, error) {
 
 func GetUserByEmail(email string) (*User, error) {
 	email = strings.ToLower(email)
+	if isdebug.Is && GetDebugUser().Email == email {
+		return GetDebugUser(), nil
+	}
 	u := &User{Email: email}
 	has, err := database.Get().Get(u)
 	if err != nil {
@@ -51,7 +70,7 @@ func CreateUser(u *User) error {
 }
 
 func (u *User) Update() error {
-	_, err := database.Get().Id(u.ID).AllCols().Update(u)
+	_, err := database.Get().Id(u.Id).AllCols().Update(u)
 	return err
 }
 

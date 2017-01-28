@@ -3,21 +3,18 @@
         <div class="main">
             <h1 class="page-header">Challenges</h1>
             <div class="table-responsive">
-                <table data-toggle="table"
-                       data-url="/api/challenges"
-                       data-search="true"
-                       data-show-refresh="false"
-                       data-show-toggle="false"
-                       data-show-columns="false">
-                    <thead>
-                        <tr>
-                            <th data-field="ID">Id</th>
-                            <th data-field="Name">Name</th>
-                            <th data-field="Image">Image</th>
-                        </tr>
-                    </thead>
-                </table>
+                <table id="qa-challenges"></table>
             </div>
         </div>
     </div>
 {{ end }}
+{{ define "css-custom" -}}
+<style>
+#qa-challenges tbody tr {
+	cursor: pointer;	
+}
+</style>
+{{- end }}
+{{ define "js-custom" -}}
+<script>$(function(){ qa_portal.initChallenges(); });</script>
+{{- end }}
