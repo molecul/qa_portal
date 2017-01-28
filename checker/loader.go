@@ -16,6 +16,7 @@ type LocalChallengeSettings struct {
 	Cmd        string
 	Points     int64
 	TargetPath string
+	Inject     string
 }
 
 func loadYaml(path string, out interface{}) error {
@@ -57,7 +58,9 @@ func (c *Checker) loadLocalChallenge(directoryName string) (*model.Challenge, er
 	challenge.Image = settings.Image
 	challenge.Name = settings.Name
 	challenge.Points = settings.Points
+	challenge.Cmd = settings.Cmd
 	challenge.TargetPath = settings.TargetPath
+	challenge.Inject = settings.Inject
 
 	descPath := filepath.Join(dir, "README.md")
 	description, err := ioutil.ReadFile(descPath)

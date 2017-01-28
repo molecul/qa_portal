@@ -13,13 +13,15 @@ web:
     sessionname: oauth
     oauthclientid: change_me
     oauthsecret: change_me
+    sessionduration: 86400
 model:
+  localtestfiles: ./data
 checker:
   endpoint: unix:///var/run/docker.sock
   challengespath: etc/challenges
   imagespath: etc/images
-  timeout: 0
-  threads: 0
+  timeout: 60000
+  threads: 4
 database:
   driver: sqlite3
   dsn: _db.sqlite3

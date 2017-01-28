@@ -7,7 +7,7 @@ type ErrUserAlreadyExist struct {
 }
 
 func (e ErrUserAlreadyExist) Error() string {
-	return fmt.Sprintf("User already exist [id:%v, email:%v]", e.u.ID, e.u.Email)
+	return fmt.Sprintf("User already exist [id:%v, email:%v]", e.u.Id, e.u.Email)
 }
 
 func IsErrUserAlreadyExist(err error) bool {

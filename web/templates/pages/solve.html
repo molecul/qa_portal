@@ -1,0 +1,34 @@
+{{ define "content" }}
+      <div class="row">
+        <div class="main">
+          <h1 class="page-header">Challenge</h1>
+		  <div id="description">
+			{{- .description -}}
+	      </div>
+		  <h2 class="page-header">Send solution</h1>
+		  <form class="form-horizontal" method="post">
+		    <fieldset>
+  			<div class="form-group">
+  			  <label class="col-md-2 control-label" for="code">Past code</label>
+				<div class="col-md-8">
+      			  <textarea class="form-control" id="code" name="code" rows="16">### Your code here ###</textarea>
+			  </div>
+			</div>
+			<div class="form-group">
+			  <label class="col-md-2 control-label" for="file">Or upload file</label>
+			  <div class="col-md-8">
+			    <input id="file" name="file" class="input-file" type="file">
+			  </div>
+			</div>
+			<div class="form-group">
+			  <label class="col-md-2 control-label" for="singlebutton">And submit solution</label>
+			  <div class="col-md-8">
+			    <button id="singlebutton" name="singlebutton" class="btn btn-primary">Submit</button>
+			  </div>
+			</div>
+			</fieldset>
+		  </form>
+		  
+        </div>
+      </div>
+{{ end }}
