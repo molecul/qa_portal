@@ -87,6 +87,7 @@ func (cfg *Configuration) initRoutes(r *gin.Engine) {
 	render := eztemplate.New()
 	render.TemplatesDir = "web/templates/"
 	render.Layout = "base"
+	render.TemplateFuncMap = initTemplatesFuncs()
 	if isdebug.Is {
 		render.Debug = true
 	}

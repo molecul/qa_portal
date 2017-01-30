@@ -45,10 +45,11 @@ func TestHandler(ctx *gin.Context) {
 	input, _ := ioutil.ReadFile(test.GetInputFileName())
 	output, _ := ioutil.ReadFile(test.GetOutputFileName())
 
-	// TODO
-	//ctx.HTML(http.StatusOK, "pages/test", )
-	ctx.JSON(http.StatusOK, gin.H{"user": auth.GetUser(ctx),
-		"test": test, "test_input": string(input), "test_output": string(output)})
+	ctx.HTML(http.StatusOK, "pages/test",
+		gin.H{"user": auth.GetUser(ctx),
+			"test":        test,
+			"test_input":  string(input),
+			"test_output": string(output)})
 }
 
 func SolveHandlerGet(ctx *gin.Context) {

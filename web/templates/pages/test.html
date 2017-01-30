@@ -1,6 +1,40 @@
 {{ define "content" }}
       <div class="row">
         <div class="main">
+		  <h1 class="page-header">Solution #{{ .test.Id }}</h1>
+		  <h3>
+		  {{ if .test.Checked }}
+		    {{ if .test.IsSucess }}
+			  <span class="label label-success">Status: Success</span>
+			{{ else }}
+			  <span class="label label-danger">Status: Fail</span>
+			{{ end }}
+		  {{ else }}
+		    <span class="label label-info">Status: In progress</span>
+	      {{ end }}
+		  </h3>
+		  <h3 class="page-header">Output</h3>
+		  <samp id="test-output">{{- .test_output -}}</samp>
+		  <h3 class="page-header">Input</h3>
+		  <pre id="test-input">
+		  {{- .test_input -}}
+		  </pre>
         </div>
       </div>
+{{ end }}
+{{ define "css-custom" }}
+<style>
+samp#test-output {
+	white-space: pre-wrap;
+}
+</style>
+{{ end }}
+{{ define "js-custom" }}
+<script src="/static/js/ansi_up.js"></script>
+<script>
+$(function() {
+	var $output = $("samp#test-output");
+	$output.html(ansi_up.ansi_to_html(ansi_up.escape_for_html($output.html())));
+});
+</script>
 {{ end }}
