@@ -72,12 +72,21 @@ func (t *Test) Update(output []byte) error {
 	return err
 }
 
-func Tests(page, pageSize int) ([]*Test, error) {
+func Tests(page, pageSize int, onlyUntested bool, forUser int64) ([]*Test, error) {
 	tests := make([]*Test, 0, pageSize)
-	return tests, database.Get().Limit(pageSize, (page-1)*pageSize).Find(&tests)
-}
-
-func TestsUntested(count int) ([]*Test, error) {
-	tests := make([]*Test, 0, count)
-	return tests, database.Get().Asc("Id").Limit(count).Where("checked is null").Find(&tests)
+	q := database.Get().NewSession()
+	if pageSize != 0 {
+		if page == 0 {
+			q = q.Limit(pageSize)
+		} else {
+			q = q.Limit(pageSize, (page-1)*pageSize)
+		}
+	}
+	if onlyUntested {
+		q = q.Where("checked is null")
+	}
+	if forUser != 0 {
+		q = q.Where("user_id == ?", forUser)
+	}
+	return tests, q.Find(&tests)
 }
