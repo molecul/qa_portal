@@ -42,11 +42,15 @@ func TestHandler(ctx *gin.Context) {
 		views.RenderError(ctx, err)
 		return
 	}
+	user := auth.GetUser(ctx)
+	if test == nil || test.UserId != user.Id {
+		ctx.JSON(http.StatusNotFound, nil)
+	}
 	input, _ := ioutil.ReadFile(test.GetInputFileName())
 	output, _ := ioutil.ReadFile(test.GetOutputFileName())
 
 	ctx.HTML(http.StatusOK, "pages/test",
-		gin.H{"user": auth.GetUser(ctx),
+		gin.H{"user": user,
 			"test":        test,
 			"test_input":  string(input),
 			"test_output": string(output)})

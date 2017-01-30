@@ -89,7 +89,7 @@ func collector(c *Checker) {
 		case <-c.CollectorUpdater:
 			// Clear updater chan queue
 			log.Printf("[Checker-Collector]: COLLECTOR UPDATING [%d]", c.clearCollectorChain())
-			tests, err := model.TestsUntested(c.Config.Threads)
+			tests, err := model.Tests(0, c.Config.Threads, true, 0)
 			if err != nil {
 				log.Printf("[Checker-Collector]: Error loading tests: %v", err)
 			}
