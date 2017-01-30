@@ -12,4 +12,31 @@ var qa_portal = {
 			},
 		});
 	},
+	initProfile: function() {
+		$('table#history').bootstrapTable({
+		    url: '/api/history',
+			showRefresh: true,
+		    columns: [
+				{ field: 'Id', title: 'Id' },
+				{ field: 'Challenge',title: 'Challenge' },
+				{ field: 'State', title: 'State' },
+				{ field: 'Duration',title: 'Duration' },
+			],
+			detailFormatter: function(index, row, element) {
+			    switch (element) {
+			        case 1:
+			            return '<span class="label label-success">Success</span>';
+			            break
+			        case 2:
+			            return '<span class="label label-danger">Failed</span>';
+			            break
+					case 0:
+						return '<span class="label label-info">In progress</span>';
+						break
+			        default:
+			            return '<span class="label label-warning">Undefined</span>';
+			    }
+			},
+		});
+	},
 }
