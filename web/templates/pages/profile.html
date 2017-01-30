@@ -22,22 +22,13 @@
 
           <h2 class="sub-header">History</h2>
           <div class="table-responsive">
-                <table data-toggle="table"
-                       data-url="/api/history"
-                       data-search="false"
-                       data-show-refresh="false"
-                       data-show-toggle="false"
-                       data-show-columns="false">
-                    <thead>
-                        <tr>
-							<th data-field="Id">Id</th>
-							<th data-field="Challenge">Challenge</th>
-							<th data-field="State">State</th>
-							<th data-field="Duration">Duration</th>
-                        </tr>
-                    </thead>
+                <table id="history">
                 </table>
           </div>
         </div>
       </div>
 {{ end }}
+
+{{ define "js-custom" -}}
+<script>$(function() {qa_portal.initProfile(); }); </script>
+{{- end }}
