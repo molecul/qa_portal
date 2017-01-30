@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-py.test -v --color=yes --tb=no
+py.test --color=yes --tb=no
