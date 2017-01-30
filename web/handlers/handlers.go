@@ -44,7 +44,7 @@ func TestHandler(ctx *gin.Context) {
 	}
 	user := auth.GetUser(ctx)
 	if test == nil || test.UserId != user.Id {
-		ctx.JSON(http.StatusNotFound, nil)
+		ctx.JSON(http.StatusNotFound, 404)
 	}
 	input, _ := ioutil.ReadFile(test.GetInputFileName())
 	output, _ := ioutil.ReadFile(test.GetOutputFileName())
